@@ -52,18 +52,18 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	if err2 != nil {
 		return Unknown, nil, err2
 	}
-	
+
 	f.reader = newReaderAt(f.resp.Body)
 
 	var t ImageType
 	var s *ImageSize
 	var e error
 
-	typebuf := make([]byte,2)
-	if _,err := f.reader.ReadAt(typebuf,0);err!=nil{
-		return Unknown,nil,err
+	typebuf := make([]byte, 2)
+	if _, err := f.reader.ReadAt(typebuf, 0); err != nil {
+		return Unknown, nil, err
 	}
-	
+
 	switch {
 	case string(typebuf) == "BM":
 		t = BMP
@@ -77,9 +77,9 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	case bytes.Equal(typebuf, []byte{0x89, 0x50}):
 		t = PNG
 		s, e = f.getPNGImageSize()
-	//case string(typebuf) == "II" || string(typebuf) == "MM":
-	//	t = TIFF
-	//	s = f.getTIFFImageSize()
+	case string(typebuf) == "II" || string(typebuf) == "MM":
+		t = TIFF
+		s, e = f.getTIFFImageSize()
 	case string(typebuf) == "RI":
 		t = WEBP
 		s, e = f.getWEBPImageSize()
@@ -91,6 +91,6 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	return t, s, e
 }
 
-func GetFastImage(url string) (ImageType, *ImageSize, error) {
+func GetImageSize(url string) (ImageType, *ImageSize, error) {
 	return (&FastImage{Url: url}).Detect()
 }

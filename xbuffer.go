@@ -1,7 +1,7 @@
 package fastimage
+
 import (
-"io"
-"fmt"
+	"io"
 )
 
 type xbuffer struct {
@@ -10,7 +10,6 @@ type xbuffer struct {
 }
 
 func (b *xbuffer) fill(end int) error {
-	fmt.Printf("fill %+v\n",end)
 	m := len(b.buf)
 	if end > m {
 		if end > cap(b.buf) {
