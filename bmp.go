@@ -1,9 +1,9 @@
 package fastimage
 
 func (f *FastImage) getBMPImageSize() (*ImageSize, error) {
-	slice, err := f.getBytes(18, 8)
-	if err != nil {
-		return nil, err
+	slice := make([]byte,8)
+	if _,err:= f.reader.ReadAt(slice,18);err!=nil{
+		return nil,err
 	}
 
 	imageSize := ImageSize{}

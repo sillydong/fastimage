@@ -5,8 +5,8 @@ import (
 )
 
 func (f *FastImage) getPNGImageSize() (*ImageSize, error) {
-	slice, err := f.getBytes(16, 9)
-	if err != nil {
+	slice := make([]byte, 8)
+	if _, err := f.reader.ReadAt(slice, 16); err != nil {
 		return nil, err
 	}
 

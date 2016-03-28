@@ -7,13 +7,14 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"io"
 )
 
 type FastImage struct {
-	Url string
+	Url    string
 
 	resp   *http.Response
-	buffer bytes.Buffer
+	reader io.ReaderAt
 }
 
 func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
@@ -23,7 +24,7 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	}
 
 	header := make(http.Header)
-	header.Set("Referer", u.Scheme+"://"+u.Host)
+	header.Set("Referer", u.Scheme + "://" + u.Host)
 	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
 
 	req := &http.Request{
@@ -51,12 +52,18 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	if err2 != nil {
 		return Unknown, nil, err2
 	}
+	
+	f.reader = newReaderAt(f.resp.Body)
 
 	var t ImageType
 	var s *ImageSize
 	var e error
 
-	typebuf, _ := f.getBytes(0, 2)
+	typebuf := make([]byte,2)
+	if _,err := f.reader.ReadAt(typebuf,0);err!=nil{
+		return Unknown,nil,err
+	}
+	
 	switch {
 	case string(typebuf) == "BM":
 		t = BMP
@@ -64,9 +71,9 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	case bytes.Equal(typebuf, []byte{0x47, 0x49}):
 		t = GIF
 		s, e = f.getGIFImageSize()
-	//case bytes.Equal(typebuf, []byte{0xFF, 0xD8}):
-	//	t = JPEG
-	//	s = f.getJPEGImageSize()
+	case bytes.Equal(typebuf, []byte{0xFF, 0xD8}):
+		t = JPEG
+		s, e = f.getJPEGImageSize()
 	case bytes.Equal(typebuf, []byte{0x89, 0x50}):
 		t = PNG
 		s, e = f.getPNGImageSize()
@@ -81,31 +88,7 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		e = fmt.Errorf("Unkown image type")
 	}
 
-	fmt.Println(f.buffer.Len())
-
 	return t, s, e
-}
-
-func (f *FastImage) getBytes(start, size int) ([]byte, error) {
-	if f.buffer.Len() < start+size {
-		err := f.readToBuffer(start + size - f.buffer.Len())
-		if err != nil {
-			return []byte{}, err
-		}
-	}
-
-	bytes := f.buffer.Bytes()
-	return bytes[start : start+size], nil
-}
-
-func (f *FastImage) readToBuffer(size int) error {
-	chunk := make([]byte, size)
-	_, err := f.resp.Body.Read(chunk)
-	if err != nil {
-		return err
-	}
-	f.buffer.Write(chunk)
-	return nil
 }
 
 func GetFastImage(url string) (ImageType, *ImageSize, error) {

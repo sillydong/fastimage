@@ -1,8 +1,8 @@
 package fastimage
 
 func (f *FastImage) getWEBPImageSize() (*ImageSize, error) {
-	slice, err := f.getBytes(26, 4)
-	if err != nil {
+	slice := make([]byte, 4)
+	if _, err := f.reader.ReadAt(slice, 26); err != nil {
 		return nil, err
 	}
 
