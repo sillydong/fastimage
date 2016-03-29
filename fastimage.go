@@ -18,6 +18,7 @@ type FastImage struct {
 }
 
 func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
+	start:= time.Now().UnixNano()
 	u, err := url.Parse(f.Url)
 	if err != nil {
 		return Unknown, nil, err
@@ -86,7 +87,10 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		t = Unknown
 		e = fmt.Errorf("Unkown image type")
 	}
-
+	stop := time.Now().UnixNano()
+	if stop-start>600000000{
+		fmt.Printf("[%v]%v\n",stop-start, f.Url)
+	}
 	return t, s, e
 }
 
