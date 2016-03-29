@@ -47,11 +47,10 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 
 	var err2 error
 	f.resp, err2 = client.Do(req)
-	defer f.resp.Body.Close()
-
 	if err2 != nil {
 		return Unknown, nil, err2
 	}
+	defer f.resp.Body.Close()
 
 	f.reader = newReaderAt(f.resp.Body)
 

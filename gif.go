@@ -1,8 +1,8 @@
 package fastimage
 
 func (f *FastImage) getGIFImageSize() (*ImageSize, error) {
-	slice := make([]byte, 4)
-	if _, err := f.reader.ReadAt(slice, 6); err != nil {
+	slice, err := f.reader.(*xbuffer).Slice(6, 4)
+	if err != nil {
 		return nil, err
 	}
 

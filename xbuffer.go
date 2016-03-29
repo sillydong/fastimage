@@ -13,7 +13,11 @@ func (b *xbuffer) fill(end int) error {
 	m := len(b.buf)
 	if end > m {
 		if end > cap(b.buf) {
-			newbuf := make([]byte, end, end)
+			newcap := 1024
+			for newcap < end {
+				newcap *= 2
+			}
+			newbuf := make([]byte, end, newcap)
 			copy(newbuf, b.buf)
 			b.buf = newbuf
 		} else {

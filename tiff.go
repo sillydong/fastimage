@@ -12,6 +12,7 @@ func (f *FastImage) getTIFFImageSize() (*ImageSize, error) {
 	if _, err := f.reader.ReadAt(p, 0); err != nil {
 		return nil, err
 	}
+	
 	var bo binary.ByteOrder
 	switch string(p[0:4]) {
 	case leHeader:
