@@ -3,29 +3,29 @@ package fastimage
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
-	"io"
 )
 
 type FastImage struct {
-	Url    string
+	Url string
 
 	resp   *http.Response
 	reader io.ReaderAt
 }
 
 func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
-	start:= time.Now().UnixNano()
+	start := time.Now().UnixNano()
 	u, err := url.Parse(f.Url)
 	if err != nil {
 		return Unknown, nil, err
 	}
 
 	header := make(http.Header)
-	header.Set("Referer", u.Scheme + "://" + u.Host)
+	header.Set("Referer", u.Scheme+"://"+u.Host)
 	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
 
 	req := &http.Request{
@@ -85,11 +85,11 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		s, e = f.getWEBPImageSize()
 	default:
 		t = Unknown
-		e = fmt.Errorf("Unkown image type")
+		e = fmt.Errorf("Unkown image type[%v]", typebuf)
 	}
 	stop := time.Now().UnixNano()
-	if stop-start>600000000{
-		fmt.Printf("[%v]%v\n",stop-start, f.Url)
+	if stop-start > 600000000 {
+		fmt.Printf("[%v]%v\n", stop-start, f.Url)
 	}
 	return t, s, e
 }

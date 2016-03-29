@@ -3,8 +3,8 @@ package fastimage
 import (
 	"encoding/binary"
 	"fmt"
-	"math"
 	"io"
+	"math"
 )
 
 func (f *FastImage) getTIFFImageSize() (*ImageSize, error) {
@@ -12,7 +12,7 @@ func (f *FastImage) getTIFFImageSize() (*ImageSize, error) {
 	if _, err := f.reader.ReadAt(p, 0); err != nil {
 		return nil, err
 	}
-	
+
 	var bo binary.ByteOrder
 	switch string(p[0:4]) {
 	case leHeader:
@@ -30,14 +30,14 @@ func (f *FastImage) getTIFFImageSize() (*ImageSize, error) {
 	}
 	numItems := int(bo.Uint16(p[0:2]))
 	// All IFD entries are read in one chunk.
-	p = make([]byte, ifdLen * numItems)
-	if _, err := f.reader.ReadAt(p, ifdOffset + 2); err != nil {
+	p = make([]byte, ifdLen*numItems)
+	if _, err := f.reader.ReadAt(p, ifdOffset+2); err != nil {
 		return nil, err
 	}
 
 	imageSize := ImageSize{}
 	for i := 0; i < len(p); i += ifdLen {
-		t := p[i : i + ifdLen]
+		t := p[i : i+ifdLen]
 		tag := bo.Uint16(t[0:2])
 		switch tag {
 		case tImageWidth:
@@ -68,7 +68,7 @@ func ifdUint(reader io.ReaderAt, bo binary.ByteOrder, p []byte) (u []uint, err e
 	}
 
 	count := bo.Uint32(p[4:8])
-	if count > math.MaxInt32 / lengths[datatype] {
+	if count > math.MaxInt32/lengths[datatype] {
 		return nil, fmt.Errorf("IFD data too large")
 	}
 	if datalen := lengths[datatype] * count; datalen > 4 {
@@ -76,7 +76,7 @@ func ifdUint(reader io.ReaderAt, bo binary.ByteOrder, p []byte) (u []uint, err e
 		raw = make([]byte, datalen)
 		_, err = reader.ReadAt(raw, int64(bo.Uint32(p[8:12])))
 	} else {
-		raw = p[8 : 8 + datalen]
+		raw = p[8 : 8+datalen]
 	}
 	if err != nil {
 		return nil, err
@@ -90,11 +90,11 @@ func ifdUint(reader io.ReaderAt, bo binary.ByteOrder, p []byte) (u []uint, err e
 		}
 	case dtShort:
 		for i := uint32(0); i < count; i++ {
-			u[i] = uint(bo.Uint16(raw[2 * i : 2 * (i + 1)]))
+			u[i] = uint(bo.Uint16(raw[2*i : 2*(i+1)]))
 		}
 	case dtLong:
 		for i := uint32(0); i < count; i++ {
-			u[i] = uint(bo.Uint32(raw[4 * i : 4 * (i + 1)]))
+			u[i] = uint(bo.Uint32(raw[4*i : 4*(i+1)]))
 		}
 	default:
 		return nil, fmt.Errorf("data type")
@@ -103,16 +103,16 @@ func ifdUint(reader io.ReaderAt, bo binary.ByteOrder, p []byte) (u []uint, err e
 }
 
 const (
-	tImageWidth = 256
+	tImageWidth  = 256
 	tImageLength = 257
 
 	leHeader = "II\x2A\x00" // Header for little-endian files.
 	beHeader = "MM\x00\x2A" // Header for big-endian files.
 
-	ifdLen = 12 // Length of an IFD entry in bytes.
-	dtByte = 1
-	dtASCII = 2
-	dtShort = 3
-	dtLong = 4
+	ifdLen     = 12 // Length of an IFD entry in bytes.
+	dtByte     = 1
+	dtASCII    = 2
+	dtShort    = 3
+	dtLong     = 4
 	dtRational = 5
 )

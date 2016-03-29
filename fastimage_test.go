@@ -3,7 +3,7 @@ package fastimage
 import (
 	"fmt"
 	"testing"
-"time"
+	"time"
 )
 
 func TestBytes(b *testing.T) {

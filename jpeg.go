@@ -18,9 +18,9 @@ func (f *FastImage) parseJPEGData(offset int, segment int) (*ImageSize, error) {
 	switch segment {
 	case nextSegment:
 		newOffset := offset + 1
-		bytes, err := f.reader.(*xbuffer).Slice(newOffset,1)
+		bytes, err := f.reader.(*xbuffer).Slice(newOffset, 1)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 		b := bytes[0]
 		if b == 0xFF {
@@ -48,7 +48,7 @@ func (f *FastImage) parseJPEGData(offset int, segment int) (*ImageSize, error) {
 		}
 		return f.parseJPEGData(newOffset, skipSegment)
 	case skipSegment:
-		bytes, err := f.reader.(*xbuffer).Slice(offset + 1, 2)
+		bytes, err := f.reader.(*xbuffer).Slice(offset+1, 2)
 		if err != nil {
 			return nil, err
 		}
@@ -57,15 +57,15 @@ func (f *FastImage) parseJPEGData(offset int, segment int) (*ImageSize, error) {
 		newOffset := offset + int(length)
 		return f.parseJPEGData(newOffset, nextSegment)
 	case parseSegment:
-		bytes, err := f.reader.(*xbuffer).Slice(offset + 4, 4)
+		bytes, err := f.reader.(*xbuffer).Slice(offset+4, 4)
 		if err != nil {
 			return nil, err
 		}
 
 		imageSize := ImageSize{}
 
-		imageSize.Width = uint32(readUint16(bytes[2 : 4]))
-		imageSize.Height = uint32(readUint16(bytes[0 : 2]))
+		imageSize.Width = uint32(readUint16(bytes[2:4]))
+		imageSize.Height = uint32(readUint16(bytes[0:2]))
 
 		return &imageSize, nil
 	default:

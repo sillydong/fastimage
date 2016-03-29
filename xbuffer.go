@@ -35,7 +35,7 @@ func (b *xbuffer) fill(end int) error {
 func (b *xbuffer) ReadAt(p []byte, off int64) (int, error) {
 	o := int(off)
 	end := o + len(p)
-	if int64(end) != off + int64(len(p)) {
+	if int64(end) != off+int64(len(p)) {
 		return 0, io.ErrUnexpectedEOF
 	}
 
