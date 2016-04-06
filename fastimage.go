@@ -43,6 +43,7 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 			Dial: (&net.Dialer{
 				Timeout: 2 * time.Second,
 			}).Dial,
+			ResponseHeaderTimeout: time.Second,
 		},
 	}
 
@@ -52,6 +53,10 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		return Unknown, nil, err2
 	}
 	defer f.resp.Body.Close()
+
+	if f.resp.StatusCode != 200 {
+		return Unknown, nil, fmt.Errorf(f.resp.Status)
+	}
 
 	f.reader = newReaderAt(f.resp.Body)
 

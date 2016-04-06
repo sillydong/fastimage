@@ -15,6 +15,15 @@ func TestBytes(b *testing.T) {
 	fmt.Println(len(bytes))
 }
 
+func TestImage(t *testing.T) {
+	url := "http://img03.store.sogou.com/net/a/04/link?appid=100520031&w=710&url=http%3A%2F%2Fmmbiz.qpic.cn%2Fmmbiz%2FQUZRHutbdrGlNSQbzcvHInkz4jRWMYjl0tYssEgtHR8qS5rEzMMCickFPulIcPj5xwy6pIriczRrRu0YAibAEJ2xA%2F0%3Fwx_fmt%3Dgif"
+	//url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
+	imagetype, size, err := GetImageSize(url)
+	fmt.Println(imagetype)
+	fmt.Printf("%v\n", size)
+	fmt.Printf("%+v\n", err)
+}
+
 func TestPNGImageA(b *testing.T) {
 	url := "http://fc08.deviantart.net/fs71/f/2012/214/7/c/futurama__bender_by_suzura-d59kq1p.png"
 
