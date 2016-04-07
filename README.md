@@ -26,7 +26,7 @@ For instance, this is a big 10MB JPEG image on wikipedia:
 
 	url := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
 	
-	imagetype, size, err := fastimage.DetectImageType(url)
+	imagetype, size, err := fastimage.GetImageSize(url)
 	if err != nil {
 		// Something went wrong, http failed? not an image?
 		panic(err)
