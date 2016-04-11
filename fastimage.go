@@ -11,7 +11,8 @@ import (
 )
 
 type FastImage struct {
-	Url string
+	Url     string
+	Timeout time.Duration
 
 	resp   *http.Response
 	reader io.ReaderAt
@@ -41,9 +42,8 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			Dial: (&net.Dialer{
-				Timeout: 2 * time.Second,
+				Timeout: f.Timeout,
 			}).Dial,
-			ResponseHeaderTimeout: time.Second,
 		},
 	}
 
@@ -93,12 +93,12 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		e = fmt.Errorf("Unkown image type[%v]", typebuf)
 	}
 	stop := time.Now().UnixNano()
-	if stop-start > 600000000 {
+	if stop-start > 500000000 {
 		fmt.Printf("[%v]%v\n", stop-start, f.Url)
 	}
 	return t, s, e
 }
 
 func GetImageSize(url string) (ImageType, *ImageSize, error) {
-	return (&FastImage{Url: url}).Detect()
+	return (&FastImage{Url: url, Timeout: 3 * time.Second}).Detect()
 }

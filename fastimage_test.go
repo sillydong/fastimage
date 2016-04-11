@@ -16,8 +16,9 @@ func TestBytes(b *testing.T) {
 }
 
 func TestImage(t *testing.T) {
-	url := "http://img03.store.sogou.com/net/a/04/link?appid=100520031&w=710&url=http%3A%2F%2Fmmbiz.qpic.cn%2Fmmbiz%2FQUZRHutbdrGlNSQbzcvHInkz4jRWMYjl0tYssEgtHR8qS5rEzMMCickFPulIcPj5xwy6pIriczRrRu0YAibAEJ2xA%2F0%3Fwx_fmt%3Dgif"
+	//url := "http://img03.store.sogou.com/net/a/04/link?appid=100520031&w=710&url=http%3A%2F%2Fmmbiz.qpic.cn%2Fmmbiz%2FQUZRHutbdrGlNSQbzcvHInkz4jRWMYjl0tYssEgtHR8qS5rEzMMCickFPulIcPj5xwy6pIriczRrRu0YAibAEJ2xA%2F0%3Fwx_fmt%3Dgif"
 	//url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
+	url := "https://mmbiz.qlogo.cn/mmbiz/5gKn2ibOCyceiccOz6knZXUkOpom3HVXia6yToaDAAWQdc8uRL5VFViakV7Fa2O5J38oZOC2ib1Cyuaib0nIgTTdCiaHw/0?wx_fmt=jpeg"
 	imagetype, size, err := GetImageSize(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
