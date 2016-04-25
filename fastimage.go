@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"strings"
 )
 
 type FastImage struct {
 	Url     string
 	Timeout time.Duration
 
-	resp   *http.Response
-	reader io.ReaderAt
+	resp    *http.Response
+	reader  io.ReaderAt
 }
 
 func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
@@ -26,7 +27,7 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	}
 
 	header := make(http.Header)
-	header.Set("Referer", u.Scheme+"://"+u.Host)
+	header.Set("Referer", u.Scheme + "://" + u.Host)
 	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
 
 	req := &http.Request{
@@ -56,6 +57,9 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 
 	if f.resp.StatusCode != 200 {
 		return Unknown, nil, fmt.Errorf(f.resp.Status)
+	}
+	if !strings.Contains(f.resp.Header.Get("Content-Type"), "image") {
+		return Unknown, nil, fmt.Errorf("%v is not image", f.Url)
 	}
 
 	f.reader = newReaderAt(f.resp.Body)
@@ -93,8 +97,8 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		e = fmt.Errorf("Unkown image type[%v]", typebuf)
 	}
 	stop := time.Now().UnixNano()
-	if stop-start > 500000000 {
-		fmt.Printf("[%v]%v\n", stop-start, f.Url)
+	if stop - start > 500000000 {
+		fmt.Printf("[%v]%v\n", stop - start, f.Url)
 	}
 	return t, s, e
 }
