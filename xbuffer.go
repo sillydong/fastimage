@@ -51,6 +51,30 @@ func (b *xbuffer) Slice(off, n int) ([]byte, error) {
 	return b.buf[off:end], nil
 }
 
+func (b *xbuffer) ReadByte() (byte, error) {
+	current := len(b.buf)
+	if err := b.fill(current + 1); err != nil {
+		return 0, err
+	}
+	return b.buf[current], nil
+}
+
+func (b *xbuffer) ReadBytes(n int) ([]byte, error) {
+	current := len(b.buf)
+	if err := b.fill(current + n); err != nil {
+		return nil, err
+	}
+	return b.buf[current : current+n], nil
+}
+
+func (b *xbuffer) ReadFull(p []byte) (int, error) {
+	o := len(b.buf)
+	end := o + len(p)
+
+	err := b.fill(end)
+	return copy(p, b.buf[o:end]), err
+}
+
 func newReaderAt(r io.Reader) io.ReaderAt {
 	if ra, ok := r.(io.ReaderAt); ok {
 		return ra

@@ -4,7 +4,50 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"net/http"
 )
+
+func TestBuffer(b *testing.T){
+	url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
+	resp,err := http.Get(url)
+	if err != nil {
+		fmt.Printf("%+v\n",err)
+	}else{
+		defer resp.Body.Close()
+		
+		reader := newReaderAt(resp.Body)
+		
+		buffers,err := reader.(*xbuffer).Slice(0,4)
+		if err != nil {
+			fmt.Printf("%+v\n",err)
+		}else{
+			fmt.Printf("%+v\n",buffers)
+		}
+
+		tmp := make([]byte, 3)
+		size, err := reader.(*xbuffer).ReadFull(tmp)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+		}else {
+			fmt.Printf("%+v\n", tmp)
+			fmt.Printf("%+v\n", size)
+		}
+
+		buffer, err := reader.(*xbuffer).ReadByte();
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+		}else {
+			fmt.Printf("%+v\n", buffer)
+		}
+		
+		buffers2,err := reader.(*xbuffer).ReadBytes(2)
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+		}else {
+			fmt.Printf("%+v\n", buffers2)
+		}
+	}
+}
 
 func TestBytes(b *testing.T) {
 	bytes := []byte("abcdefghijklmnopqrstuvwxyz")
@@ -19,7 +62,9 @@ func TestImage(t *testing.T) {
 	//url := "http://img03.store.sogou.com/net/a/04/link?appid=100520031&w=710&url=http%3A%2F%2Fmmbiz.qpic.cn%2Fmmbiz%2FQUZRHutbdrGlNSQbzcvHInkz4jRWMYjl0tYssEgtHR8qS5rEzMMCickFPulIcPj5xwy6pIriczRrRu0YAibAEJ2xA%2F0%3Fwx_fmt%3Dgif"
 	//url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
 	//url := "https://mmbiz.qlogo.cn/mmbiz/5gKn2ibOCyceiccOz6knZXUkOpom3HVXia6yToaDAAWQdc8uRL5VFViakV7Fa2O5J38oZOC2ib1Cyuaib0nIgTTdCiaHw/0?wx_fmt=jpeg"
-	url := "http://p.bydonline.com/img/27.jpg"
+	//url := "http://p.bydonline.com/img/27.jpg"
+	//url := "http://pic.bbs.zszhili.com/data/attachment/forum/201604/24/110256gugqu9tzgtnauawe.jpg"
+	url := "http://pics.18qiang.com/attachment/photo/Mon_1604/15253_736f1461223031839eece92bc6254.jpg"
 	imagetype, size, err := GetImageSize(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
