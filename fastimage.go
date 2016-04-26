@@ -2,13 +2,14 @@ package fastimage
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
-	"time"
 	"strings"
+	"time"
 )
 
 type FastImage struct {
@@ -20,7 +21,7 @@ type FastImage struct {
 }
 
 func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
-	start := time.Now().UnixNano()
+	//start := time.Now().UnixNano()
 	u, err := url.Parse(f.Url)
 	if err != nil {
 		return Unknown, nil, err
@@ -42,9 +43,8 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 
 	client := &http.Client{
 		Transport: &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout: f.Timeout,
-			}).Dial,
+			Dial:            (&net.Dialer{Timeout: f.Timeout}).Dial,
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
 
@@ -96,13 +96,13 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		t = Unknown
 		e = fmt.Errorf("Unkown image type[%v]", typebuf)
 	}
-	stop := time.Now().UnixNano()
-	if stop - start > 500000000 {
-		fmt.Printf("[%v]%v\n", stop - start, f.Url)
-	}
+	//stop := time.Now().UnixNano()
+	//if stop-start > 500000000 {
+	//	fmt.Printf("[%v]%v\n", stop-start, f.Url)
+	//}
 	return t, s, e
 }
 
 func GetImageSize(url string) (ImageType, *ImageSize, error) {
-	return (&FastImage{Url: url, Timeout: 3 * time.Second}).Detect()
+	return (&FastImage{Url: url, Timeout: 2 * time.Second}).Detect()
 }
