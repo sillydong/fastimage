@@ -23,36 +23,34 @@ the size and type of the image, it stops the download.
 
 For instance, this is a big 10MB JPEG image on wikipedia:
 
+**Method1**
 
-	url := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
-	
-	imagetype, size, err := fastimage.GetImageSize(url)
-	if err != nil {
-		// Something went wrong, http failed? not an image?
-		panic(err)
-	}
+	instance := fastimage.DefaultFastImage(2)
 
-	switch imagetype {
-	case fastimage.JPEG:
-		log.Printf("JPEG")
-	case fastimage.PNG:
-		log.Printf("PNG")
-	case fastimage.GIF:
-		log.Printf("GIF")
-	case fastimage.BMP:
-		log.Printf("BMP")
-	case fastimage.WEBP:
-		log.Printf("WEBP")
-	case fastimage.TIFF:
-		log.Printf("TIFF")
-	}
+	url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+	imagetype1, size1, err1 := instance.Detect(url1)
+	fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
 
-	log.Printf("Image type: %s", imagetype.String())
-	log.Printf("Image size: %v", size)
+	url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+	imagetype2, size2, err2 := instance.Detect(url2)
+	fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
 
+
+**Method2**
+
+	url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+	imagetype1, size1, err1 := fastimage.GetImageSize(url1)
+	fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
+
+	url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+	imagetype2, size2, err2 := fastimage.GetImageSize(url2)
+	fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
+
+**Notice**
+
+Method1 is better to detect multiple images because it shares one *http.Client.
 
 ## Supported file types
-
 
 | File type | Can detect type? | Can detect size? |
 |-----------|:----------------:|:----------------:|
@@ -63,11 +61,15 @@ For instance, this is a big 10MB JPEG image on wikipedia:
 | TIFF      | Yes              | Yes              |
 | WEBP      | Yes              | Yes              |
 
+**Notice**
 
-# Project details
+Some webp images' Content-Type in header is `text/plain`. Here in this library we only parse response data when Content-Type has keyword **"image"** in.
+
+
+## TODO
+
+I'm thinking about using [`valyala/fasthttp`](https://github.com/valyala/fasthttp) to replace `net/http` to get better network performance.
 
 ### License
 
-fastimage is under MIT license. See the [LICENSE][license] file for details.
-
-[license]: https://github.com/sillydong/fastimage/blob/master/LICENSE
+fastimage is under MIT license. See the [LICENSE](https://github.com/sillydong/fastimage/blob/master/LICENSE) file for details.
