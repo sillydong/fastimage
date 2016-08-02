@@ -110,3 +110,8 @@ func (f *FastImage) Detect(uri string) (ImageType, *ImageSize, error) {
 	//}
 	return t, s, e
 }
+
+//GetImageSize create a default fastimage instance to detect image type and size
+func GetImageSize(url string) (ImageType, *ImageSize, error) {
+	return DefaultFastImage(2).Detect(url)
+}
