@@ -12,23 +12,37 @@ import (
 	"time"
 )
 
+// FastImage instance needs to be initialized before use
 type FastImage struct {
-	Url     string
-	Timeout time.Duration
-
-	resp    *http.Response
-	reader  io.ReaderAt
+	Client *http.Client
 }
 
-func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
+//DefaultFastImage returns default FastImage client
+func DefaultFastImage(timeout int) *FastImage {
+	return &FastImage{
+		Client: &http.Client{
+			Transport: &http.Transport{
+				Dial:            (&net.Dialer{Timeout: time.Duration(timeout) * time.Second}).Dial,
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		},
+	}
+}
+
+type decoder struct {
+	reader io.ReaderAt
+}
+
+//Detect image type and size
+func (f *FastImage) Detect(uri string) (ImageType, *ImageSize, error) {
 	//start := time.Now().UnixNano()
-	u, err := url.Parse(f.Url)
+	u, err := url.Parse(uri)
 	if err != nil {
 		return Unknown, nil, err
 	}
 
 	header := make(http.Header)
-	header.Set("Referer", u.Scheme + "://" + u.Host)
+	header.Set("Referer", u.Scheme+"://"+u.Host)
 	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
 
 	req := &http.Request{
@@ -41,57 +55,51 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 		Host:       u.Host,
 	}
 
-	client := &http.Client{
-		Transport: &http.Transport{
-			Dial:            (&net.Dialer{Timeout: f.Timeout}).Dial,
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
-	var err2 error
-	f.resp, err2 = client.Do(req)
+	resp, err2 := f.Client.Do(req)
 	if err2 != nil {
 		return Unknown, nil, err2
 	}
-	defer f.resp.Body.Close()
+	defer resp.Body.Close()
 
-	if f.resp.StatusCode != 200 {
-		return Unknown, nil, fmt.Errorf(f.resp.Status)
+	if resp.StatusCode != 200 {
+		return Unknown, nil, fmt.Errorf(resp.Status)
 	}
-	if !strings.Contains(f.resp.Header.Get("Content-Type"), "image") {
-		return Unknown, nil, fmt.Errorf("%v is not image", f.Url)
+	if !strings.Contains(resp.Header.Get("Content-Type"), "image") {
+		return Unknown, nil, fmt.Errorf("%v is not image", uri)
 	}
 
-	f.reader = newReaderAt(f.resp.Body)
+	d := &decoder{
+		reader: newReaderAt(resp.Body),
+	}
 
 	var t ImageType
 	var s *ImageSize
 	var e error
 
 	typebuf := make([]byte, 2)
-	if _, err := f.reader.ReadAt(typebuf, 0); err != nil {
+	if _, err := d.reader.ReadAt(typebuf, 0); err != nil {
 		return Unknown, nil, err
 	}
 
 	switch {
 	case string(typebuf) == "BM":
 		t = BMP
-		s, e = f.getBMPImageSize()
+		s, e = d.getBMPImageSize()
 	case bytes.Equal(typebuf, []byte{0x47, 0x49}):
 		t = GIF
-		s, e = f.getGIFImageSize()
+		s, e = d.getGIFImageSize()
 	case bytes.Equal(typebuf, []byte{0xFF, 0xD8}):
 		t = JPEG
-		s, e = f.getJPEGImageSize()
+		s, e = d.getJPEGImageSize()
 	case bytes.Equal(typebuf, []byte{0x89, 0x50}):
 		t = PNG
-		s, e = f.getPNGImageSize()
+		s, e = d.getPNGImageSize()
 	case string(typebuf) == "II" || string(typebuf) == "MM":
 		t = TIFF
-		s, e = f.getTIFFImageSize()
+		s, e = d.getTIFFImageSize()
 	case string(typebuf) == "RI":
 		t = WEBP
-		s, e = f.getWEBPImageSize()
+		s, e = d.getWEBPImageSize()
 	default:
 		t = Unknown
 		e = fmt.Errorf("Unkown image type[%v]", typebuf)
@@ -101,8 +109,4 @@ func (f *FastImage) Detect() (ImageType, *ImageSize, error) {
 	//	fmt.Printf("[%v]%v\n", stop-start, f.Url)
 	//}
 	return t, s, e
-}
-
-func GetImageSize(url string) (ImageType, *ImageSize, error) {
-	return (&FastImage{Url: url, Timeout: 2 * time.Second}).Detect()
 }

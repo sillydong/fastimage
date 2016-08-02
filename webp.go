@@ -1,6 +1,6 @@
 package fastimage
 
-func (f *FastImage) getWEBPImageSize() (*ImageSize, error) {
+func (f *decoder) getWEBPImageSize() (*ImageSize, error) {
 	slice, err := f.reader.(*xbuffer).Slice(26, 4)
 	if err != nil {
 		return nil, err

@@ -23,13 +23,13 @@ const (
 	Unknown
 )
 
-const _ImageType_name = "GIFPNGJPEGBMPTIFFWEBPUnknown"
+const imagetypename = "GIFPNGJPEGBMPTIFFWEBPUnknown"
 
-var _ImageType_index = [...]uint8{0, 3, 6, 10, 13, 17, 21, 28}
+var imagetypeindex = [...]uint8{0, 3, 6, 10, 13, 17, 21, 28}
 
 func (i ImageType) String() string {
-	if i+1 >= ImageType(len(_ImageType_index)) {
+	if i+1 >= ImageType(len(imagetypeindex)) {
 		return fmt.Sprintf("ImageType(%d)", i)
 	}
-	return _ImageType_name[_ImageType_index[i]:_ImageType_index[i+1]]
+	return imagetypename[imagetypeindex[i]:imagetypeindex[i+1]]
 }

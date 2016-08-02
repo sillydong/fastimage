@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-func (f *FastImage) getTIFFImageSize() (*ImageSize, error) {
+func (f *decoder) getTIFFImageSize() (*ImageSize, error) {
 	p := make([]byte, 8)
 	if _, err := f.reader.ReadAt(p, 0); err != nil {
 		return nil, err

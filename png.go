@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 )
 
-func (f *FastImage) getPNGImageSize() (*ImageSize, error) {
+func (f *decoder) getPNGImageSize() (*ImageSize, error) {
 	slice, err := f.reader.(*xbuffer).Slice(16, 8)
 	if err != nil {
 		return nil, err

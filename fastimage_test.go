@@ -2,48 +2,54 @@ package fastimage
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
-	"net/http"
 )
 
-func TestBuffer(b *testing.T){
-	url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
-	resp,err := http.Get(url)
+var fastimage *FastImage
+
+func init() {
+	fastimage = DefaultFastImage(2)
+}
+
+func TestBuffer(b *testing.T) {
+	url := "http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
+	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("%+v\n",err)
-	}else{
+		fmt.Printf("%+v\n", err)
+	} else {
 		defer resp.Body.Close()
-		
+
 		reader := newReaderAt(resp.Body)
-		
-		buffers,err := reader.(*xbuffer).Slice(0,4)
+
+		buffers, err := reader.(*xbuffer).Slice(0, 4)
 		if err != nil {
-			fmt.Printf("%+v\n",err)
-		}else{
-			fmt.Printf("%+v\n",buffers)
+			fmt.Printf("%+v\n", err)
+		} else {
+			fmt.Printf("%+v\n", buffers)
 		}
 
 		tmp := make([]byte, 3)
 		size, err := reader.(*xbuffer).ReadFull(tmp)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
-		}else {
+		} else {
 			fmt.Printf("%+v\n", tmp)
 			fmt.Printf("%+v\n", size)
 		}
 
-		buffer, err := reader.(*xbuffer).ReadByte();
+		buffer, err := reader.(*xbuffer).ReadByte()
 		if err != nil {
 			fmt.Printf("%+v\n", err)
-		}else {
+		} else {
 			fmt.Printf("%+v\n", buffer)
 		}
-		
-		buffers2,err := reader.(*xbuffer).ReadBytes(2)
+
+		buffers2, err := reader.(*xbuffer).ReadBytes(2)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
-		}else {
+		} else {
 			fmt.Printf("%+v\n", buffers2)
 		}
 	}
@@ -65,7 +71,7 @@ func TestImage(t *testing.T) {
 	//url := "http://p.bydonline.com/img/27.jpg"
 	//url := "http://pic.bbs.zszhili.com/data/attachment/forum/201604/24/110256gugqu9tzgtnauawe.jpg"
 	url := "http://pics.18qiang.com/attachment/photo/Mon_1604/15253_736f1461223031839eece92bc6254.jpg"
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -74,7 +80,7 @@ func TestImage(t *testing.T) {
 func TestPNGImageA(b *testing.T) {
 	url := "http://fc08.deviantart.net/fs71/f/2012/214/7/c/futurama__bender_by_suzura-d59kq1p.png"
 
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -84,7 +90,7 @@ func BenchmarkPNGImageA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		url := "http://fc08.deviantart.net/fs71/f/2012/214/7/c/futurama__bender_by_suzura-d59kq1p.png"
 
-		imagetype, size, err := GetImageSize(url)
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)
@@ -94,7 +100,7 @@ func BenchmarkPNGImageA(b *testing.B) {
 func TestJPEGImageA(b *testing.T) {
 	url := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
 
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -104,7 +110,7 @@ func BenchmarkJPEGImageA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		url := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
 
-		imagetype, size, err := GetImageSize(url)
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)
@@ -114,7 +120,7 @@ func BenchmarkJPEGImageA(b *testing.B) {
 func TestGIFImageA(b *testing.T) {
 	url := "http://media.giphy.com/media/gXcIuJBbRi2Va/giphy.gif"
 
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -125,7 +131,7 @@ func BenchmarkGIFImageA(b *testing.B) {
 
 		url := "http://media.giphy.com/media/gXcIuJBbRi2Va/giphy.gif"
 
-		imagetype, size, err := GetImageSize(url)
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)
@@ -134,7 +140,7 @@ func BenchmarkGIFImageA(b *testing.B) {
 
 func TestBMPImageA(b *testing.T) {
 	url := "http://www.fileformat.info/format/bmp/sample/1d71eff930af4773a836a32229fde106/download"
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -143,7 +149,7 @@ func TestBMPImageA(b *testing.T) {
 func BenchmarkBMPImageA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		url := "http://www.fileformat.info/format/bmp/sample/1d71eff930af4773a836a32229fde106/download"
-		imagetype, size, err := GetImageSize(url)
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)
@@ -153,7 +159,7 @@ func BenchmarkBMPImageA(b *testing.B) {
 func TestTIFFImageA(b *testing.T) {
 	a := time.Now().UnixNano()
 	url := "http://www.fileformat.info/format/tiff/sample/928c96cd555b40e19fad31d5c06374c5/download"
-	imagetype, size, err := GetImageSize(url)
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(time.Now().UnixNano() - a)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
@@ -163,7 +169,7 @@ func TestTIFFImageA(b *testing.T) {
 func BenchmarkTIFFImageA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		url := "http://www.fileformat.info/format/tiff/sample/928c96cd555b40e19fad31d5c06374c5/download"
-		imagetype, size, err := GetImageSize(url)
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)
@@ -171,8 +177,8 @@ func BenchmarkTIFFImageA(b *testing.B) {
 }
 
 func TestWEBPImageA(b *testing.T) {
-	url := "http://mindprod.com/image/jgloss/lossy.webp"
-	imagetype, size, err := GetImageSize(url)
+	url := "http://www.etherdream.com/WebP/Test.webp"
+	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
 	fmt.Printf("%+v\n", err)
@@ -180,8 +186,8 @@ func TestWEBPImageA(b *testing.T) {
 
 func BenchmarkWEBPImageA(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		url := "http://mindprod.com/image/jgloss/lossy.webp"
-		imagetype, size, err := GetImageSize(url)
+		url := "http://www.etherdream.com/WebP/Test.webp"
+		imagetype, size, err := fastimage.Detect(url)
 		fmt.Println(imagetype)
 		fmt.Printf("%v\n", size)
 		fmt.Printf("%+v\n", err)

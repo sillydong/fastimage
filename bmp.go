@@ -1,6 +1,6 @@
 package fastimage
 
-func (f *FastImage) getBMPImageSize() (*ImageSize, error) {
+func (f *decoder) getBMPImageSize() (*ImageSize, error) {
 	slice, err := f.reader.(*xbuffer).Slice(18, 8)
 	if err != nil {
 		return nil, err

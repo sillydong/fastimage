@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (f *FastImage) getJPEGImageSize() (*ImageSize, error) {
+func (f *decoder) getJPEGImageSize() (*ImageSize, error) {
 	offset := 2
 	var err error
 	tmp := make([]byte, 2)
