@@ -25,26 +25,35 @@ For instance, this is a big 10MB JPEG image on wikipedia:
 
 **Method1**
 
-	instance := fastimage.DefaultFastImage(2)
+```go
+customHeaders := map[string]string{
+    "X-SECRET-HEADER": "your-header-value"
+}
+instance := fastimage.NewFastImage(2, customHeaders)
+//leave it to nil to use default header settings
+//eg. 
+//instance := fastimage.NewFastImage(2, nil)
 
-	url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
-	imagetype1, size1, err1 := instance.Detect(url1)
-	fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
+url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+imagetype1, size1, err1 := instance.Detect(url1)
+fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
 
-	url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
-	imagetype2, size2, err2 := instance.Detect(url2)
-	fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
-
+url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+imagetype2, size2, err2 := instance.Detect(url2)
+fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
+```
 
 **Method2**
 
-	url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
-	imagetype1, size1, err1 := fastimage.GetImageSize(url1)
-	fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
+```go
+url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+imagetype1, size1, err1 := fastimage.GetImageSize(url1)
+fmt.Printf("%+v\t%+v\t%+v\n", imagetype1, size1, err1)
 
-	url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
-	imagetype2, size2, err2 := fastimage.GetImageSize(url2)
-	fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
+url2 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
+imagetype2, size2, err2 := fastimage.GetImageSize(url2)
+fmt.Printf("%+v\t%+v\t%+v\n", imagetype2, size2, err2)
+```
 
 **Notice**
 

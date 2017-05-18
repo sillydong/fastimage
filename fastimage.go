@@ -15,10 +15,19 @@ import (
 // FastImage instance needs to be initialized before use
 type FastImage struct {
 	Client *http.Client
+	header *http.Header
 }
 
-//DefaultFastImage returns default FastImage client
-func DefaultFastImage(timeout int) *FastImage {
+//NewFastImage returns a FastImage client
+func NewFastImage(timeout int, headers map[string]string) *FastImage {
+
+	header := &http.Header{}
+	if headers != nil {
+		for headerKey, headerValue := range headers {
+			header.Add(headerKey, headerValue)
+		}
+	}
+
 	return &FastImage{
 		Client: &http.Client{
 			Transport: &http.Transport{
@@ -26,11 +35,38 @@ func DefaultFastImage(timeout int) *FastImage {
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 		},
+		header: header,
 	}
 }
 
 type decoder struct {
 	reader io.ReaderAt
+}
+
+func (f *FastImage) newRequest(url *url.URL) *http.Request {
+	header := make(http.Header)
+	header.Set("Referer", url.Scheme+"://"+url.Host)
+	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
+
+	//override default header settings
+	for chKey := range *f.header {
+		header.Set(chKey, f.header.Get(chKey))
+	}
+
+	req := &http.Request{
+		Method:     "GET",
+		URL:        url,
+		Proto:      "HTTP/1.1",
+		ProtoMajor: 1,
+		ProtoMinor: 1,
+		Header:     header,
+	}
+	//Host in header affects nothing in golang, consider a not-fixed-yet bug.
+	if _, present := (*f.header)["Host"]; present {
+		req.Host = f.header.Get("Host")
+	}
+
+	return req
 }
 
 //Detect image type and size
@@ -41,19 +77,7 @@ func (f *FastImage) Detect(uri string) (ImageType, *ImageSize, error) {
 		return Unknown, nil, err
 	}
 
-	header := make(http.Header)
-	header.Set("Referer", u.Scheme+"://"+u.Host)
-	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36")
-
-	req := &http.Request{
-		Method:     "GET",
-		URL:        u,
-		Proto:      "HTTP/1.1",
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-		Header:     header,
-		Host:       u.Host,
-	}
+	req := f.newRequest(u)
 
 	resp, err2 := f.Client.Do(req)
 	if err2 != nil {
@@ -113,5 +137,5 @@ func (f *FastImage) Detect(uri string) (ImageType, *ImageSize, error) {
 
 //GetImageSize create a default fastimage instance to detect image type and size
 func GetImageSize(url string) (ImageType, *ImageSize, error) {
-	return DefaultFastImage(2).Detect(url)
+	return NewFastImage(2, nil).Detect(url)
 }

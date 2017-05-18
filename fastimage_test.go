@@ -10,7 +10,7 @@ import (
 var fastimage *FastImage
 
 func init() {
-	fastimage = DefaultFastImage(2)
+	fastimage = NewFastImage(2, nil)
 }
 
 func TestBuffer(b *testing.T) {
