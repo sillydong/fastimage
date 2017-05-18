@@ -25,7 +25,13 @@ For instance, this is a big 10MB JPEG image on wikipedia:
 
 **Method1**
 
-	instance := fastimage.DefaultFastImage(2)
+	customerHeaders := map[string]string{
+		"X-SECRET-HEADER": "your-header-value"
+	}
+	instance := fastimage.DefaultFastImage(2, customerHeaders)
+	//leave it to nil to use default header settings
+	//eg. 
+	//instance := fastimage.DefaultFastImage(2, nil)
 
 	url1 := "http://upload.wikimedia.org/wikipedia/commons/9/9a/SKA_dishes_big.jpg"
 	imagetype1, size1, err1 := instance.Detect(url1)
