@@ -29,7 +29,7 @@ For instance, this is a big 10MB JPEG image on wikipedia:
 customHeaders := map[string]string{
     "X-SECRET-HEADER": "your-header-value"
 }
-instance := fastimage.NewFastImage(2, customerHeaders)
+instance := fastimage.NewFastImage(2, customHeaders)
 //leave it to nil to use default header settings
 //eg. 
 //instance := fastimage.NewFastImage(2, nil)
