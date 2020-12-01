@@ -10,7 +10,14 @@ import (
 var fastimage *FastImage
 
 func init() {
-	fastimage = NewFastImage(2, nil)
+	cfg := Config{
+		Header: http.Header{
+			// "Host": []string{"www.baidu.com"}, // for common fake host
+		},
+		ReadTimeout: 5 * time.Second,
+		DialTimeout: 2 * time.Second,
+	}
+	fastimage = NewFastImage(&cfg)
 }
 
 func TestBuffer(b *testing.T) {
