@@ -79,7 +79,7 @@ func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
-		Header:     f.header,
+		Header:     f.header.Clone(),
 	}
 	if _, exists := (f.header)["Host"]; exists {
 		req.Host = f.header.Get("Host")
