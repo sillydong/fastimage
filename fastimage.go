@@ -71,8 +71,8 @@ type decoder struct {
 }
 
 func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
+	f.headerMux.Lock()
 	f.header.Set("Referer", url.Scheme+"://"+url.Host)
-
 	req := &http.Request{
 		Method:     "GET",
 		URL:        url,
@@ -81,12 +81,10 @@ func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
 		ProtoMinor: 1,
 		Header:     *f.header,
 	}
-
-	f.headerMux.RLock()
 	if _, exists := (*f.header)["Host"]; exists {
 		req.Host = f.header.Get("Host")
 	}
-	f.headerMux.RUnlock()
+	f.headerMux.Unlock()
 
 	if fakeHost != "" {
 		req.Host = fakeHost
