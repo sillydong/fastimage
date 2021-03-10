@@ -23,7 +23,7 @@ type Config struct {
 type FastImage struct {
 	config *Config
 	client *http.Client
-	header *http.Header
+	header http.Header
 
 	headerMux sync.RWMutex
 }
@@ -62,7 +62,7 @@ func NewFastImage(cfg *Config) *FastImage {
 			},
 			Timeout: readTimeout,
 		},
-		header: &combinedHeaders,
+		header: combinedHeaders,
 	}
 }
 
@@ -79,9 +79,9 @@ func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
-		Header:     *f.header,
+		Header:     f.header,
 	}
-	if _, exists := (*f.header)["Host"]; exists {
+	if _, exists := (f.header)["Host"]; exists {
 		req.Host = f.header.Get("Host")
 	}
 	f.headerMux.Unlock()
