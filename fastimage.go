@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -24,8 +23,6 @@ type FastImage struct {
 	config *Config
 	client *http.Client
 	header http.Header
-
-	headerMux sync.RWMutex
 }
 
 const (
@@ -71,20 +68,20 @@ type decoder struct {
 }
 
 func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
-	f.headerMux.Lock()
-	f.header.Set("Referer", url.Scheme+"://"+url.Host)
+	header := f.header.Clone()
+	header.Set("Referer", url.Scheme+"://"+url.Host)
+
 	req := &http.Request{
 		Method:     "GET",
 		URL:        url,
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
-		Header:     f.header.Clone(),
+		Header:     header,
 	}
-	if _, exists := (f.header)["Host"]; exists {
-		req.Host = f.header.Get("Host")
+	if _, exists := header["Host"]; exists {
+		req.Host = header.Get("Host")
 	}
-	f.headerMux.Unlock()
 
 	if fakeHost != "" {
 		req.Host = fakeHost
