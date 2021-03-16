@@ -22,7 +22,7 @@ type Config struct {
 type FastImage struct {
 	config *Config
 	client *http.Client
-	header *http.Header
+	header http.Header
 }
 
 const (
@@ -59,7 +59,7 @@ func NewFastImage(cfg *Config) *FastImage {
 			},
 			Timeout: readTimeout,
 		},
-		header: &combinedHeaders,
+		header: combinedHeaders,
 	}
 }
 
@@ -68,7 +68,8 @@ type decoder struct {
 }
 
 func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
-	f.header.Set("Referer", url.Scheme+"://"+url.Host)
+	header := f.header.Clone()
+	header.Set("Referer", url.Scheme+"://"+url.Host)
 
 	req := &http.Request{
 		Method:     "GET",
@@ -76,11 +77,12 @@ func (f *FastImage) newRequest(url *url.URL, fakeHost string) *http.Request {
 		Proto:      "HTTP/1.1",
 		ProtoMajor: 1,
 		ProtoMinor: 1,
-		Header:     *f.header,
+		Header:     header,
 	}
-	if _, exists := (*f.header)["Host"]; exists {
-		req.Host = f.header.Get("Host")
+	if _, exists := header["Host"]; exists {
+		req.Host = header.Get("Host")
 	}
+
 	if fakeHost != "" {
 		req.Host = fakeHost
 	}
