@@ -16,6 +16,7 @@ type Config struct {
 	Header      http.Header
 	DialTimeout time.Duration
 	ReadTimeout time.Duration
+	Client      *http.Client
 }
 
 // FastImage instance needs to be initialized before use
@@ -32,6 +33,8 @@ const (
 
 //NewFastImage returns a FastImage client
 func NewFastImage(cfg *Config) *FastImage {
+	var client *http.Client
+
 	combinedHeaders := http.Header{}
 	if cfg != nil && cfg.Header != nil {
 		combinedHeaders = cfg.Header
@@ -50,15 +53,21 @@ func NewFastImage(cfg *Config) *FastImage {
 		}
 	}
 
-	return &FastImage{
-		config: cfg,
-		client: &http.Client{
+	if cfg.Client != nil {
+		client = cfg.Client
+	} else {
+		client = &http.Client{
 			Transport: &http.Transport{
-				Dial:            (&net.Dialer{Timeout: dialTimeout}).Dial,
+				DialContext:     (&net.Dialer{Timeout: dialTimeout}).DialContext,
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 			Timeout: readTimeout,
-		},
+		}
+	}
+
+	return &FastImage{
+		config: cfg,
+		client: client,
 		header: combinedHeaders,
 	}
 }
