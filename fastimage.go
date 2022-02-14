@@ -8,14 +8,18 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 type Config struct {
-	Header      http.Header
-	DialTimeout time.Duration
-	ReadTimeout time.Duration
+	Header                http.Header
+	InsecureSkipVerify    bool
+	AllowedContentTypes   []string
+	AllowedFileExtensions []string
+	DialTimeout           time.Duration
+	ReadTimeout           time.Duration
 }
 
 // FastImage instance needs to be initialized before use
@@ -55,7 +59,7 @@ func NewFastImage(cfg *Config) *FastImage {
 		client: &http.Client{
 			Transport: &http.Transport{
 				Dial:            (&net.Dialer{Timeout: dialTimeout}).Dial,
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: cfg.InsecureSkipVerify},
 			},
 			Timeout: readTimeout,
 		},
@@ -102,6 +106,20 @@ func (f *FastImage) Detect(uri string, fakeHosts ...string) (ImageType, *ImageSi
 		return Unknown, nil, err
 	}
 
+	if len(f.config.AllowedFileExtensions) > 0 {
+		ext := filepath.Ext(u.Path)
+		allowed := false
+		for _, allowedExt := range f.config.AllowedFileExtensions {
+			if strings.HasSuffix(ext, allowedExt) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return Unknown, nil, fmt.Errorf("%v has file extension %s, allowed extensions are %v", uri, ext, f.config.AllowedFileExtensions)
+		}
+	}
+
 	req := f.newRequest(u, fakeHost)
 
 	resp, err2 := f.client.Do(req)
@@ -113,8 +131,17 @@ func (f *FastImage) Detect(uri string, fakeHosts ...string) (ImageType, *ImageSi
 	if resp.StatusCode != 200 {
 		return Unknown, nil, fmt.Errorf(resp.Status)
 	}
-	if !strings.Contains(resp.Header.Get("Content-Type"), "image") {
-		return Unknown, nil, fmt.Errorf("%v is not image", uri)
+	if len(f.config.AllowedContentTypes) > 0 {
+		contentType := resp.Header.Get("Content-Type")
+		allowed := false
+		for _, allowedContentType := range f.config.AllowedContentTypes {
+			if strings.Contains(contentType, allowedContentType) {
+				allowed = true
+			}
+		}
+		if !allowed {
+			return Unknown, nil, fmt.Errorf("%v has Content-Type %s, allowed Content-Types are %v", uri, contentType, f.config.AllowedContentTypes)
+		}
 	}
 
 	d := &decoder{

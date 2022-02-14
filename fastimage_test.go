@@ -14,14 +14,15 @@ func init() {
 		Header: http.Header{
 			// "Host": []string{"www.baidu.com"}, // for common fake host
 		},
-		ReadTimeout: 5 * time.Second,
-		DialTimeout: 2 * time.Second,
+		ReadTimeout:        5 * time.Second,
+		DialTimeout:        2 * time.Second,
+		InsecureSkipVerify: true,
 	}
 	fastimage = NewFastImage(&cfg)
 }
 
 func TestBuffer(b *testing.T) {
-	url := "http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
+	url := "http://host.domain.com/path.jpg"
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
@@ -72,12 +73,7 @@ func TestBytes(b *testing.T) {
 }
 
 func TestImage(t *testing.T) {
-	//url := "http://img03.store.sogou.com/net/a/04/link?appid=100520031&w=710&url=http%3A%2F%2Fmmbiz.qpic.cn%2Fmmbiz%2FQUZRHutbdrGlNSQbzcvHInkz4jRWMYjl0tYssEgtHR8qS5rEzMMCickFPulIcPj5xwy6pIriczRrRu0YAibAEJ2xA%2F0%3Fwx_fmt%3Dgif"
-	//url :="http://pic.hualongxiang.com/app/image/2016/0405/09-54-25-1459821265.s.293x355.jpg"
-	//url := "https://mmbiz.qlogo.cn/mmbiz/5gKn2ibOCyceiccOz6knZXUkOpom3HVXia6yToaDAAWQdc8uRL5VFViakV7Fa2O5J38oZOC2ib1Cyuaib0nIgTTdCiaHw/0?wx_fmt=jpeg"
-	//url := "http://p.bydonline.com/img/27.jpg"
-	//url := "http://pic.bbs.zszhili.com/data/attachment/forum/201604/24/110256gugqu9tzgtnauawe.jpg"
-	url := "http://pics.18qiang.com/attachment/photo/Mon_1604/15253_736f1461223031839eece92bc6254.jpg"
+	url := "http://host.domain.com/path.jpg"
 	imagetype, size, err := fastimage.Detect(url)
 	fmt.Println(imagetype)
 	fmt.Printf("%v\n", size)
